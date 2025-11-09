@@ -20,6 +20,34 @@
     padding-right: 2.5rem;
     appearance: none;
   }
+
+  /* Smooth transitions for all interactive elements */
+  button,
+  input,
+  select,
+  textarea,
+  a {
+    transition: all 0.2s ease;
+  }
+
+  /* Focus outline improvements for accessibility */
+  button:focus-visible,
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible,
+  a:focus-visible {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+  }
+
+  /* Remove default focus outline but keep for keyboard navigation */
+  button:focus:not(:focus-visible),
+  input:focus:not(:focus-visible),
+  select:focus:not(:focus-visible),
+  textarea:focus:not(:focus-visible),
+  a:focus:not(:focus-visible) {
+    outline: none;
+  }
 }
 
 /* ============================================
@@ -60,5 +88,28 @@
 
   .active-menu-item::before {
     @apply opacity-100 scale-y-100;
+  }
+}
+
+/* ============================================
+   UTILITIES LAYER - Utilidades personalizadas
+   ============================================ */
+@layer utilities {
+  /* Smooth scroll behavior */
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* Disable smooth scroll for users who prefer reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+
+    * {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
   }
 }
