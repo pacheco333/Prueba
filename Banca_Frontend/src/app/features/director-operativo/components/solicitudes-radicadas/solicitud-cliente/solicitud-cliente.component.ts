@@ -170,8 +170,20 @@ export class SolicitudClienteComponent implements OnInit {
 
     this.solicitudService.descargarArchivo(this.solicitud.id_solicitud).subscribe({
       next: (response) => {
+        // Determinar el tipo de archivo y MIME type
+        const tipoArchivo = this.solicitud!.tipo_archivo || 'pdf';
+        const mimeTypes: { [key: string]: string } = {
+          'pdf': 'application/pdf',
+          'png': 'image/png',
+          'jpg': 'image/jpeg',
+          'jpeg': 'image/jpeg',
+          'doc': 'application/msword',
+          'docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+        };
+        const mimeType = mimeTypes[tipoArchivo] || 'application/octet-stream';
+        
         // Crear un blob desde la respuesta
-        const blob = new Blob([response], { type: 'application/pdf'  });
+        const blob = new Blob([response], { type: mimeType });
         
         // Crear URL temporal
         const url = window.URL.createObjectURL(blob);
@@ -179,7 +191,7 @@ export class SolicitudClienteComponent implements OnInit {
         // Crear elemento <a> para descargar
         const link = document.createElement('a');
         link.href = url;
-        link.download = `solicitud_${this.solicitud!.id_solicitud}_archivo.pdf`;
+        link.download = `solicitud_${this.solicitud!.id_solicitud}_archivo.${tipoArchivo}`;
         
         // Simular click
         document.body.appendChild(link);

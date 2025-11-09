@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import solicitudService from '../services/solicitudService';
+import { getMimeTypeFromExtension } from '../../../utils/fileTypeUtils';
 
 export class SolicitudController {
 
@@ -45,6 +46,7 @@ export class SolicitudController {
     try {
       const { cedula, comentario } = req.body;
       const archivo = req.file?.buffer;
+      const tipoArchivo = req.file?.mimetype;
 
       // Verificar que el usuario esté autenticado y tenga id_usuario_rol
       if (!req.user || !req.user.id_usuario_rol) {
@@ -79,7 +81,8 @@ export class SolicitudController {
         cliente.id_cliente,
         req.user.id_usuario_rol,
         comentario,
-        archivo
+        archivo,
+        tipoArchivo
       );
 
       res.status(201).json({ 
@@ -262,9 +265,9 @@ export class SolicitudController {
         return;
       }
 
-      const archivo = await solicitudService.obtenerArchivo(idSolicitud);
+      const resultado = await solicitudService.obtenerArchivo(idSolicitud);
 
-      if (!archivo) {
+      if (!resultado) {
         res.status(404).json({ 
           success: false, 
           message: 'Archivo no encontrado' 
@@ -272,8 +275,11 @@ export class SolicitudController {
         return;
       }
 
-      res.setHeader('Content-Type', 'application/octet-stream');
-      res.setHeader('Content-Disposition', `attachment; filename=solicitud_${idSolicitud}.pdf`);
+      const { archivo, tipo_archivo } = resultado;
+      const mimeType = getMimeTypeFromExtension(tipo_archivo);
+
+      res.setHeader('Content-Type', mimeType);
+      res.setHeader('Content-Disposition', `attachment; filename=solicitud_${idSolicitud}.${tipo_archivo}`);
       res.send(archivo);
     } catch (error) {
       console.error('Error en descargarArchivo:', error);

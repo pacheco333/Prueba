@@ -21,6 +21,7 @@ export class SolicitudClienteService {
           s.fecha_solicitud,
           s.fecha_respuesta,
           IF(s.archivo IS NOT NULL, true, false) as tiene_archivo,
+          s.tipo_archivo,
           
           c.primer_nombre,
           c.segundo_nombre,
@@ -69,6 +70,7 @@ export class SolicitudClienteService {
         fecha_solicitud: row.fecha_solicitud,
         fecha_respuesta: row.fecha_respuesta,
         tiene_archivo: row.tiene_archivo === 1,
+        tipo_archivo: row.tipo_archivo,
         cliente: {
           primer_nombre: row.primer_nombre,
           segundo_nombre: row.segundo_nombre,
@@ -151,10 +153,10 @@ export class SolicitudClienteService {
   /**
    * Obtener archivo adjunto de una solicitud
    */
-  async obtenerArchivo(id_solicitud: number): Promise<Buffer | null> {
+  async obtenerArchivo(id_solicitud: number): Promise<{ archivo: Buffer; tipo_archivo: string } | null> {
     try {
       const query = `
-        SELECT archivo 
+        SELECT archivo, tipo_archivo 
         FROM solicitudes_apertura 
         WHERE id_solicitud = ? AND archivo IS NOT NULL
       `;
@@ -165,7 +167,10 @@ export class SolicitudClienteService {
         return null;
       }
 
-      return rows[0].archivo;
+      return {
+        archivo: rows[0].archivo,
+        tipo_archivo: rows[0].tipo_archivo || 'pdf'
+      };
 
     } catch (error) {
       console.error('Error en obtenerArchivo:', error);
