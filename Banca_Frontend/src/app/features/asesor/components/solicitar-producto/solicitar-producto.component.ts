@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SolicitudService } from '../../services/solicitud.service';
 import { AuthService } from '../../../../core/services/auth.service';
+import { ToastService } from '../../../../shared/services/toast.service';
+import { ConfirmDialogService } from '../../../../shared/services/confirm-dialog.service';
 
 @Component({
   selector: 'app-solicitar-producto',
@@ -21,13 +23,16 @@ export class SolicitarProductoComponent implements OnInit {
   clienteNoEncontrado: boolean = false;
   nombreCliente: string = '';
   isLoading: boolean = false;
+  isSubmitting: boolean = false;
   
   // Datos del usuario autenticado
   currentUser: any = null;
 
   constructor(
     private solicitudService: SolicitudService,
-    private authService: AuthService
+    private authService: AuthService,
+    private toastService: ToastService,
+    private confirmDialogService: ConfirmDialogService
   ) {}
 
   ngOnInit(): void {
@@ -48,9 +53,9 @@ export class SolicitarProductoComponent implements OnInit {
     input.value = this.cedula;
   }
 
-  buscarCliente(): void {
+  async buscarCliente(): Promise<void> {
     if (!this.cedula.trim()) {
-      alert('Por favor ingrese una cédula');
+      this.toastService.warning('Por favor ingrese una cédula');
       return;
     }
 
@@ -58,6 +63,9 @@ export class SolicitarProductoComponent implements OnInit {
     this.isLoading = true;
     this.clienteEncontrado = false;
     this.clienteNoEncontrado = false;
+    
+    // Simular delay de procesamiento
+    await new Promise(resolve => setTimeout(resolve, 500));
     
     this.solicitudService.buscarCliente(this.cedula).subscribe({
       next: (response) => {
@@ -87,7 +95,7 @@ export class SolicitarProductoComponent implements OnInit {
       // Validar tamaño del archivo (máximo 5MB)
       const maxSize = 5 * 1024 * 1024; // 5MB
       if (file.size > maxSize) {
-        alert('El archivo es demasiado grande. El tamaño máximo es 5MB.');
+        this.toastService.error('El archivo es demasiado grande. El tamaño máximo es 5MB.');
         input.value = '';
         return;
       }
@@ -103,7 +111,7 @@ export class SolicitarProductoComponent implements OnInit {
       ];
       
       if (!allowedTypes.includes(file.type)) {
-        alert('Tipo de archivo no permitido. Use PDF, JPG, PNG o Word.');
+        this.toastService.error('Tipo de archivo no permitido. Use PDF, JPG, PNG o Word.');
         input.value = '';
         return;
       }
@@ -113,20 +121,20 @@ export class SolicitarProductoComponent implements OnInit {
     }
   }
 
-  enviarSolicitud(): void {
+  async enviarSolicitud(): Promise<void> {
     // Validaciones
     if (!this.cedula.trim()) {
-      alert('Por favor ingrese la cédula del titular');
+      this.toastService.warning('Por favor ingrese la cédula del titular');
       return;
     }
 
     if (!this.clienteEncontrado) {
-      alert('Debe buscar y verificar que el cliente existe antes de enviar la solicitud');
+      this.toastService.warning('Debe buscar y verificar que el cliente existe antes de enviar la solicitud');
       return;
     }
 
     if (!this.currentUser) {
-      alert('Error: No se pudo obtener la información del usuario. Por favor, inicie sesión nuevamente.');
+      this.toastService.error('Error: No se pudo obtener la información del usuario. Por favor, inicie sesión nuevamente.');
       return;
     }
 
@@ -141,28 +149,37 @@ export class SolicitarProductoComponent implements OnInit {
     console.log('Enviando solicitud:', solicitud);
     console.log('Usuario que crea la solicitud:', this.currentUser);
     
-    this.isLoading = true;
+    this.isSubmitting = true;
+    
+    // Simular delay de procesamiento
+    await new Promise(resolve => setTimeout(resolve, 800));
     
     this.solicitudService.enviarSolicitud(solicitud).subscribe({
       next: (response) => {
-        this.isLoading = false;
+        this.isSubmitting = false;
         console.log('Solicitud enviada exitosamente:', response);
-        alert(' Solicitud enviada exitosamente');
+        this.toastService.success('¡Solicitud enviada exitosamente!');
         this.limpiarFormulario();
       },
       error: (error) => {
-        this.isLoading = false;
+        this.isSubmitting = false;
         console.error('Error al enviar solicitud:', error);
         const errorMessage = error.error?.message || 'Error al enviar la solicitud';
-        alert(` ${errorMessage}`);
+        this.toastService.error(errorMessage);
       }
     });
   }
 
   cancelar(): void {
-    if (confirm('¿Está seguro de que desea cancelar? Se perderán los datos ingresados.')) {
-      this.limpiarFormulario();
-    }
+    this.confirmDialogService.confirm(
+      '¿Está seguro de que desea cancelar? Se perderán los datos ingresados.',
+      () => this.limpiarFormulario(),
+      {
+        title: 'Cancelar solicitud',
+        confirmText: 'Sí, cancelar',
+        cancelText: 'No, continuar'
+      }
+    );
   }
 
   private limpiarFormulario(): void {

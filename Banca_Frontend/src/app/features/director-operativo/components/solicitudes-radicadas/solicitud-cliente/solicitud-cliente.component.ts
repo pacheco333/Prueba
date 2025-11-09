@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { SolicitudService, SolicitudDetalleCompleta } from './services/solicitud.service';
+import { ToastService } from '../../../../../shared/services/toast.service';
 
 @Component({
   selector: 'app-solicitud-cliente',
@@ -25,7 +26,8 @@ export class SolicitudClienteComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private solicitudService: SolicitudService
+    private solicitudService: SolicitudService,
+    private toastService: ToastService
   ) {}
 
   ngOnInit(): void {
@@ -77,29 +79,33 @@ export class SolicitudClienteComponent implements OnInit {
     this.motivoRechazo = '';
   }
 
-  confirmarRechazo(): void {
+  async confirmarRechazo(): Promise<void> {
     if (!this.motivoRechazo.trim()) {
-      alert('Por favor ingrese el motivo del rechazo');
+      this.toastService.warning('Por favor ingrese el motivo del rechazo');
       return;
     }
 
     if (!this.solicitud) return;
 
     this.procesando = true;
+    
+    // Simular delay de procesamiento
+    await new Promise(resolve => setTimeout(resolve, 600));
+    
     this.solicitudService.rechazarSolicitud(this.solicitud.id_solicitud, this.motivoRechazo).subscribe({
       next: (resp) => {
         if (resp.success) {
-          alert('Solicitud rechazada exitosamente');
+          this.toastService.success('Solicitud rechazada exitosamente');
           this.mostrarModalRechazo = false;
-          this.volver();
+          setTimeout(() => this.volver(), 1000);
         } else {
-          alert(resp.message || 'Error al rechazar la solicitud');
+          this.toastService.error(resp.message || 'Error al rechazar la solicitud');
         }
         this.procesando = false;
       },
       error: (err) => {
         console.error('Error al rechazar solicitud:', err);
-        alert('Error al conectar con el servidor');
+        this.toastService.error('Error al conectar con el servidor');
         this.procesando = false;
       }
     });
@@ -113,24 +119,28 @@ export class SolicitudClienteComponent implements OnInit {
     this.mostrarModalAprobacion = false;
   }
 
-  confirmarAprobacion(): void {
+  async confirmarAprobacion(): Promise<void> {
     if (!this.solicitud) return;
 
     this.procesando = true;
+    
+    // Simular delay de procesamiento
+    await new Promise(resolve => setTimeout(resolve, 600));
+    
     this.solicitudService.aprobarSolicitud(this.solicitud.id_solicitud).subscribe({
       next: (resp) => {
         if (resp.success) {
-          alert('Solicitud aprobada exitosamente');
+          this.toastService.success('Solicitud aprobada exitosamente');
           this.mostrarModalAprobacion = false;
-          this.volver();
+          setTimeout(() => this.volver(), 1000);
         } else {
-          alert(resp.message || 'Error al aprobar la solicitud');
+          this.toastService.error(resp.message || 'Error al aprobar la solicitud');
         }
         this.procesando = false;
       },
       error: (err) => {
         console.error('Error al aprobar solicitud:', err);
-        alert('Error al conectar con el servidor');
+        this.toastService.error('Error al conectar con el servidor');
         this.procesando = false;
       }
     });
@@ -182,9 +192,9 @@ export class SolicitudClienteComponent implements OnInit {
       error: (err) => {
         console.error('Error al descargar archivo:', err);
         if (err.status === 404) {
-          alert('No hay archivo adjunto en esta solicitud');
+          this.toastService.info('No hay archivo adjunto en esta solicitud');
         } else {
-          alert('Error al descargar el archivo');
+          this.toastService.error('Error al descargar el archivo');
         }
       }
     });

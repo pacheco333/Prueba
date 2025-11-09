@@ -109,12 +109,12 @@
     <!-- Botones Finales -->
     <div class="flex justify-center md:justify-end mt-10 gap-4" *ngIf="solicitud.estado === 'Pendiente'">
       <button (click)="abrirModalRechazo()" 
-        class="bg-red-100 text-red-600 px-6 py-3 rounded-lg font-medium hover:bg-red-200" 
+        class="bg-red-100 text-red-600 px-6 py-3 rounded-lg font-medium hover:bg-red-200 transition-all duration-200 hover:shadow-md active:transform active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed" 
         [disabled]="procesando">
         Rechazar Solicitud
       </button>
       <button (click)="abrirModalAprobacion()" 
-        class="bg-green-100 text-green-700 px-6 py-3 rounded-lg font-medium hover:bg-green-200" 
+        class="bg-green-100 text-green-700 px-6 py-3 rounded-lg font-medium hover:bg-green-200 transition-all duration-200 hover:shadow-md active:transform active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed" 
         [disabled]="procesando">
         Aprobar Solicitud
       </button>
@@ -146,11 +146,12 @@
 
       <div class="flex justify-end gap-4 mt-6">
         <button (click)="cerrarModalRechazo()" [disabled]="procesando"
-          class="px-4 py-2 bg-gray-200 rounded-lg font-medium hover:bg-gray-300">
+          class="px-4 py-2 bg-gray-200 rounded-lg font-medium hover:bg-gray-300 transition-all duration-200 hover:shadow-md active:transform active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed">
           Cancelar
         </button>
         <button (click)="confirmarRechazo()" [disabled]="procesando"
-          class="px-4 py-2 bg-red-500 text-white rounded-lg font-medium hover:bg-red-600">
+          class="px-4 py-2 bg-red-500 text-white rounded-lg font-medium hover:bg-red-600 transition-all duration-200 hover:shadow-md active:transform active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed flex items-center gap-2">
+          <span *ngIf="procesando" class="loading-spinner"></span>
           {{ procesando ? 'Procesando...' : 'Rechazar solicitud' }}
         </button>
       </div>
@@ -166,11 +167,12 @@
 
       <div class="flex justify-end gap-4">
         <button (click)="cerrarModalAprobacion()" [disabled]="procesando"
-          class="px-4 py-2 bg-gray-200 rounded-lg font-medium hover:bg-gray-300">
+          class="px-4 py-2 bg-gray-200 rounded-lg font-medium hover:bg-gray-300 transition-all duration-200 hover:shadow-md active:transform active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed">
           Cancelar
         </button>
         <button (click)="confirmarAprobacion()" [disabled]="procesando"
-          class="px-4 py-2 bg-green-500 text-white rounded-lg font-medium hover:bg-green-600">
+          class="px-4 py-2 bg-green-500 text-white rounded-lg font-medium hover:bg-green-600 transition-all duration-200 hover:shadow-md active:transform active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed flex items-center gap-2">
+          <span *ngIf="procesando" class="loading-spinner"></span>
           {{ procesando ? 'Procesando...' : 'Aprobar solicitud' }}
         </button>
       </div>

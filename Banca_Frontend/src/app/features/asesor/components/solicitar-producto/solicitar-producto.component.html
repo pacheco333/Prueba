@@ -23,9 +23,14 @@
         <button
           type="button"
           (click)="buscarCliente()"
-          class="px-6 py-2 bg-blue-900 text-white rounded-md hover:bg-blue-800 transition-colors font-medium cursor-pointer"
+          [disabled]="isLoading"
+          class="px-6 py-2 bg-blue-900 text-white rounded-md hover:bg-blue-800 transition-all duration-200 font-medium cursor-pointer hover:shadow-lg active:transform active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed flex items-center gap-2"
         >
-          Buscar cliente
+          <span *ngIf="!isLoading">Buscar cliente</span>
+          <span *ngIf="isLoading" class="flex items-center gap-2">
+            <span class="loading-spinner"></span>
+            Buscando...
+          </span>
         </button>
       </div>
       
@@ -113,14 +118,20 @@
     <div class="flex gap-3">
       <button
         type="submit"
-        class="px-6 py-2 bg-blue-900 text-white rounded-md hover:bg-blue-800 transition-colors font-medium"
+        [disabled]="isSubmitting"
+        class="px-6 py-2 bg-blue-900 text-white rounded-md hover:bg-blue-800 transition-all duration-200 font-medium hover:shadow-lg active:transform active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed flex items-center gap-2"
       >
-        Enviar solicitud
+        <span *ngIf="!isSubmitting">Enviar solicitud</span>
+        <span *ngIf="isSubmitting" class="flex items-center gap-2">
+          <span class="loading-spinner"></span>
+          Enviando...
+        </span>
       </button>
       <button
         type="button"
         (click)="cancelar()"
-        class="px-6 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors font-medium"
+        [disabled]="isSubmitting"
+        class="px-6 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-all duration-200 font-medium hover:shadow-md active:transform active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed"
       >
         Cancelar
       </button>
