@@ -41,6 +41,7 @@ export interface SolicitudDetalleCompleta {
   fecha_respuesta?: string;
   // Flag que indica si la solicitud tiene un archivo adjunto (nombre alineado al backend: tiene_archivo)
   tiene_archivo: boolean;
+  tipo_archivo?: string;
   cliente: ClienteInfo;
   contacto: ContactoInfo;
   actividad_economica: ActividadEconomicaInfo;

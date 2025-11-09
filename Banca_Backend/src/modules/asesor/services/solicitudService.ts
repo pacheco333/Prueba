@@ -1,6 +1,7 @@
 import { ResultSetHeader, RowDataPacket } from 'mysql2';
 import pool from '../../../config/database';
 import { Cliente, SolicitudApertura, ClienteResponse, SolicitudResponse } from '../../../shared/interfaces';
+import { getExtensionFromMimeType } from '../../../utils/fileTypeUtils';
 
 export class SolicitudService {
   
@@ -38,14 +39,18 @@ export class SolicitudService {
     idCliente: number,
     idUsuarioRol: number,
     comentarioAsesor?: string,
-    archivo?: Buffer
+    archivo?: Buffer,
+    tipoArchivoMime?: string
   ): Promise<number> {
     try {
+      // Convert MIME type to file extension
+      const tipoArchivo = tipoArchivoMime ? getExtensionFromMimeType(tipoArchivoMime) : null;
+      
       const [result] = await pool.query<ResultSetHeader>(
         `INSERT INTO solicitudes_apertura 
-        (id_cliente, id_usuario_rol, tipo_cuenta, estado, comentario_asesor, archivo) 
-        VALUES (?, ?, 'Ahorros', 'Pendiente', ?, ?)`,
-        [idCliente, idUsuarioRol, comentarioAsesor || null, archivo || null]
+        (id_cliente, id_usuario_rol, tipo_cuenta, estado, comentario_asesor, archivo, tipo_archivo) 
+        VALUES (?, ?, 'Ahorros', 'Pendiente', ?, ?, ?)`,
+        [idCliente, idUsuarioRol, comentarioAsesor || null, archivo || null, tipoArchivo]
       );
 
       console.log(` Solicitud creada con ID: ${result.insertId} por usuario_rol: ${idUsuarioRol}`);
@@ -225,10 +230,10 @@ export class SolicitudService {
   }
 
   // Obtener archivo de solicitud
-  async obtenerArchivo(idSolicitud: number): Promise<Buffer | null> {
+  async obtenerArchivo(idSolicitud: number): Promise<{ archivo: Buffer; tipo_archivo: string } | null> {
     try {
       const [rows] = await pool.query<RowDataPacket[]>(
-        'SELECT archivo FROM solicitudes_apertura WHERE id_solicitud = ?',
+        'SELECT archivo, tipo_archivo FROM solicitudes_apertura WHERE id_solicitud = ?',
         [idSolicitud]
       );
 
@@ -236,7 +241,10 @@ export class SolicitudService {
         return null;
       }
 
-      return rows[0].archivo as Buffer;
+      return {
+        archivo: rows[0].archivo as Buffer,
+        tipo_archivo: rows[0].tipo_archivo || 'pdf'
+      };
     } catch (error) {
       console.error('Error al obtener archivo:', error);
       throw new Error('Error al obtener el archivo');

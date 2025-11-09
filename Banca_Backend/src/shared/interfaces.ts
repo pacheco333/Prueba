@@ -29,6 +29,7 @@ export interface SolicitudApertura {
   comentario_director?: string;
   comentario_asesor?: string;
   archivo?: Buffer;
+  tipo_archivo?: string;
   fecha_solicitud?: Date;
   fecha_respuesta?: Date;
 }
@@ -126,6 +127,7 @@ export interface SolicitudDetalleCompletaBackend {
   fecha_solicitud: Date;
   fecha_respuesta?: Date;
   tiene_archivo: boolean;
+  tipo_archivo?: string;
   cliente: ClienteInfoBackend;
   contacto: ContactoInfoBackend;
   actividad_economica: ActividadEconomicaInfoBackend;

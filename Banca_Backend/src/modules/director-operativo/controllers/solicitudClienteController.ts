@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { SolicitudClienteService } from '../services/solicitudClienteService';
+import { getMimeTypeFromExtension } from '../../../utils/fileTypeUtils';
 
 export class SolicitudClienteController {
   private solicitudClienteService: SolicitudClienteService;
@@ -155,9 +156,9 @@ export class SolicitudClienteController {
         return;
       }
 
-      const archivo = await this.solicitudClienteService.obtenerArchivo(idSolicitud);
+      const resultado = await this.solicitudClienteService.obtenerArchivo(idSolicitud);
 
-      if (!archivo) {
+      if (!resultado) {
         res.status(404).json({
           success: false,
           message: 'No hay archivo adjunto en esta solicitud'
@@ -165,9 +166,12 @@ export class SolicitudClienteController {
         return;
       }
 
+      const { archivo, tipo_archivo } = resultado;
+      const mimeType = getMimeTypeFromExtension(tipo_archivo);
+
       // Configurar headers para descarga
-      res.setHeader('Content-Type', 'application/pdf');
-      res.setHeader('Content-Disposition', `attachment; filename="solicitud_${idSolicitud}_archivo.pdf"`);
+      res.setHeader('Content-Type', mimeType);
+      res.setHeader('Content-Disposition', `attachment; filename="solicitud_${idSolicitud}_archivo.${tipo_archivo}"`);
       res.send(archivo);
 
     } catch (error) {
