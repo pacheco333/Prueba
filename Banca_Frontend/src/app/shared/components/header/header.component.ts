@@ -1,6 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AuthService, User } from '../../../core/services/auth.service';
+import { ConfirmDialogService } from '../../services/confirm-dialog.service';
 
 @Component({
   selector: 'app-header',
@@ -14,7 +15,10 @@ export class HeaderComponent implements OnInit {
   
   currentUser: User | null = null;
 
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private confirmDialogService: ConfirmDialogService
+  ) {}
 
   ngOnInit() {
     this.authService.currentUser.subscribe(user => {
@@ -34,8 +38,14 @@ export class HeaderComponent implements OnInit {
 
   // Método para cerrar sesión
   cerrarSesion(): void {
-    if (confirm('¿Estás seguro de que deseas cerrar sesión?')) {
-      this.authService.logout();
-    }
+    this.confirmDialogService.confirm(
+      '¿Estás seguro de que deseas cerrar sesión?',
+      () => this.authService.logout(),
+      {
+        title: 'Cerrar sesión',
+        confirmText: 'Sí, cerrar sesión',
+        cancelText: 'Cancelar'
+      }
+    );
   }
 }
